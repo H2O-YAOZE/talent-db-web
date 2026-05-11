@@ -5,7 +5,7 @@
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/H2O-YAOZE/talent-db-web)
 
 1. 点击上方按钮，自动创建开发环境（约 30 秒）
-2. 服务自动启动，浏览器打开 → 登录 `yaojie` / `shishuaige`
+2. 服务自动启动，浏览器打开 → 登录 `admin` / `admin`
 3. 上传论文/简历 → 自动 AI 解析 → 搜索查看
 
 **注意：** 在线版不含 LLM API Key，AI 解析功能需在 `.env` 中配置 `TALENT_LLM_API_KEY`。

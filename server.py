@@ -470,8 +470,8 @@ def ensure_tables():
     )""")
     # 默认管理员
     try:
-        pw = hashlib.sha256(f"shishuaige{SECRET_KEY}".encode()).hexdigest()
-        conn.execute("INSERT OR IGNORE INTO users (username, password_hash, role) VALUES ('yaojie', ?, 'admin')", (pw,))
+        pw = hashlib.sha256(f"admin{SECRET_KEY}".encode()).hexdigest()
+        conn.execute("INSERT OR IGNORE INTO users (username, password_hash, role) VALUES ('admin', ?, 'admin')", (pw,))
     except:
         pass
     conn.commit()
