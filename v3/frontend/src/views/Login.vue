@@ -29,6 +29,7 @@ const doLogin = async () => {
     if (resp.token) {
       localStorage.setItem('token', resp.token)
       localStorage.setItem('username', resp.username)
+      localStorage.setItem('role', resp.role)
       router.push('/')
     } else {
       ElMessage.error(resp.error || '登录失败')

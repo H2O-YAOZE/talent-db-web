@@ -1,7 +1,7 @@
 import json
-from fastapi import APIRouter, Query
+from fastapi import APIRouter, Query, Header, HTTPException
 from database import get_db
-from api.auth import get_user
+from api.auth import get_user, _get_session
 
 router = APIRouter(prefix="/api", tags=["candidates"])
 
@@ -66,8 +66,16 @@ def candidate_detail(cid: int, username: str = __import__('fastapi').Depends(get
 
 
 @router.delete("/candidates/{cid}")
-def delete_candidate(cid: int, username: str = __import__('fastapi').Depends(get_user)):
+def delete_candidate(cid: int, authorization: str = Header(None)):
+    s = _get_session(authorization)
     conn = get_db()
+    row = conn.execute("SELECT uploaded_by FROM candidates WHERE id=?", (cid,)).fetchone()
+    if not row:
+        conn.close()
+        raise HTTPException(404, "候选人不存在")
+    if s["role"] != "admin" and row["uploaded_by"] != s["username"]:
+        conn.close()
+        raise HTTPException(403, "只能删除自己上传的候选人")
     conn.execute("DELETE FROM candidates WHERE id=?", (cid,))
     conn.commit()
     conn.close()

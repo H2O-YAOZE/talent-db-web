@@ -129,6 +129,16 @@ def process_resume(file_path, fallback_name=""):
     if not info.get("name") and fallback_name:
         info["name"] = fallback_name
 
+    # Sanitize GitHub URL: ensure it's a profile URL, not a repo URL
+    gh_url = info.get("github_url", "")
+    if gh_url and "/github.com/" in gh_url:
+        parts = gh_url.split("/github.com/")[-1].split("/")
+        if parts:
+            username = parts[0]
+            info["github_url"] = f"https://github.com/{username}"
+            if not info.get("github_username"):
+                info["github_username"] = username
+
     # Dedup: name + email + phone
     conn = get_db()
     name = info.get("name", "")

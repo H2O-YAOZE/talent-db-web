@@ -42,14 +42,17 @@
       <el-table-column label="时间" width="160">
         <template #default="{ row }">{{ row.created_at }}</template>
       </el-table-column>
-      <el-table-column label="操作" width="80" fixed="right">
+      <el-table-column label="操作" width="120" fixed="right">
         <template #default="{ row }">
           <el-button type="primary" text size="small" @click="goDetail(row.id)">详情</el-button>
-          <el-popconfirm title="确定删除？" @confirm="del(row.id)">
+          <el-popconfirm v-if="canDelete(row)" title="确定删除？" @confirm="del(row.id)">
             <template #reference>
               <el-button type="danger" text size="small">删除</el-button>
             </template>
           </el-popconfirm>
+          <el-tooltip v-else content="只能删除自己上传的" placement="top">
+            <el-button type="info" text size="small" disabled>删除</el-button>
+          </el-tooltip>
         </template>
       </el-table-column>
     </el-table>
@@ -85,6 +88,14 @@ const getCompany = (row) => {
 }
 
 const goDetail = (id) => router.push(`/candidate/${id}`)
+
+const currentUser = localStorage.getItem('username') || ''
+const currentRole = localStorage.getItem('role') || ''
+
+const canDelete = (row) => {
+  if (currentRole === 'admin') return true
+  return row.uploaded_by === currentUser
+}
 
 const loadData = async () => {
   loading.value = true
