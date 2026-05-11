@@ -84,15 +84,19 @@ const getLatestCompany = (row) => {
 
 const loadData = async () => {
   loading.value = true
-  const params = { page: page.value, size: 50 }
-  if (keyword.value) params.keyword = keyword.value
-  if (degree.value) params.degree = degree.value
-  if (company.value) params.company = company.value
-  if (uploader.value) params.uploader = uploader.value
-  const resp = await api.listCandidates(params)
-  if (resp && resp.data) {
-    list.value = resp.data
-    total.value = resp.total
+  try {
+    const params = { page: page.value, size: 50 }
+    if (keyword.value) params.keyword = keyword.value
+    if (degree.value) params.degree = degree.value
+    if (company.value) params.company = company.value
+    if (uploader.value) params.uploader = uploader.value
+    const resp = await api.listCandidates(params)
+    if (resp && resp.data) {
+      list.value = resp.data
+      total.value = resp.total
+    }
+  } catch (e) {
+    console.error('Load candidates failed:', e)
   }
   loading.value = false
 }
