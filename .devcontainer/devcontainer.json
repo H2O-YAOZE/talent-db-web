@@ -1,0 +1,18 @@
+{
+  "name": "AI Talent Database",
+  "image": "mcr.microsoft.com/devcontainers/python:3.11",
+  "forwardPorts": [8080],
+  "portsAttributes": {
+    "8080": {
+      "label": "Web App",
+      "onAutoForward": "openBrowser"
+    }
+  },
+  "postCreateCommand": "pip install -r requirements.txt && mkdir -p ~/projects/talent-db/data ~/projects/talent-db/input/papers ~/projects/talent-db/input/resumes",
+  "postStartCommand": "echo '🚀 启动人才数据库...' && python server.py",
+  "customizations": {
+    "codespaces": {
+      "openFiles": ["README.md"]
+    }
+  }
+}
