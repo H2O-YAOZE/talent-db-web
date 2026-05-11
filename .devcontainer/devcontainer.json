@@ -1,19 +1,25 @@
 {
-  "name": "AI Talent Database",
+  "name": "AI Talent Database v3",
   "image": "mcr.microsoft.com/devcontainers/python:3.11",
-  "forwardPorts": [8080],
+  "features": {
+    "ghcr.io/devcontainers/features/node:1": {}
+  },
+  "forwardPorts": [8081, 5173],
   "portsAttributes": {
-    "8080": {
-      "label": "Web App",
+    "8081": {
+      "label": "Backend API",
       "onAutoForward": "openBrowser"
+    },
+    "5173": {
+      "label": "Frontend Dev"
     }
   },
   "containerEnv": {
     "TALENT_LLM_API_KEY": "${localEnv:TALENT_LLM_API_KEY}",
     "TALENT_SECRET_KEY": "${localEnv:TALENT_SECRET_KEY}"
   },
-  "postCreateCommand": "pip install -r requirements.txt && mkdir -p ~/projects/talent-db/data ~/projects/talent-db/input/papers ~/projects/talent-db/input/resumes",
-  "postStartCommand": "python server.py",
+  "postCreateCommand": "cd v3/backend && pip install -r requirements.txt && mkdir -p ~/projects/talent-db/data ~/projects/talent-db/input/papers ~/projects/talent-db/input/resumes && cd ../frontend && npm install",
+  "postStartCommand": "cd v3/backend && uvicorn main:app --host 0.0.0.0 --port 8081 & cd ../frontend && npm run dev",
   "customizations": {
     "codespaces": {
       "openFiles": ["README.md"]

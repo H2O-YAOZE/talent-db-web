@@ -5,3 +5,11 @@ server.log
 *.bak
 *.bak2
 .DS_Store
+
+v3/frontend/node_modules/
+v3/frontend/dist/
+v3/backend/__pycache__/
+v3/backend/*.pyc
+v3/backend/server.log
+v3/.env
+*.log

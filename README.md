@@ -1,25 +1,46 @@
 # 🌐 人才数据库 Web 版
 
-## 🚀 一键在线使用（GitHub Codespaces）
+## 🚀 v3 新版（推荐）
+
+**一键在线使用（GitHub Codespaces）：**
 
 [![Open in GitHub Codespaces](https://github.com/codespaces/badge.svg)](https://codespaces.new/H2O-YAOZE/talent-db-web)
 
-1. 点击上方按钮，自动创建开发环境（约 30 秒）
-2. 服务自动启动，浏览器打开 → 登录 `admin` / `admin`
-3. 上传论文/简历 → 自动 AI 解析 → 搜索查看
+1. 点击上方按钮，自动创建开发环境（约 60 秒）
+2. 浏览器打开 → 登录 `admin` / `admin`
+3. 拖拽上传 PDF → 自动识别简历/论文 → LLM 解析 → GitHub 搜索
+4. 按公司/学历/团队/学校分类浏览，关键词搜索
 
-**注意：** 在线版不含 LLM API Key，AI 解析功能需在 `.env` 中配置 `TALENT_LLM_API_KEY`。
+**技术栈：** FastAPI + Vue 3 + Element Plus + SQLite + Qwen-Max
 
 ## 🖥️ 本地运行
 
 ```bash
 git clone https://github.com/H2O-YAOZE/talent-db-web.git
 cd talent-db-web
+
+# 后端
+cd v3/backend
 pip install -r requirements.txt
-cp .env.example .env  # 编辑填入你的 API Key
+cp .env.example .env  # 编辑填入 API Key
+uvicorn main:app --port 8081
+
+# 前端（另一个终端）
+cd ../frontend
+npm install
+npm run dev
+# 浏览器打开 http://localhost:5173
+```
+
+## 📦 v2（旧版，单文件版）
+
+```bash
+cp .env.example .env  # 编辑填入 API Key  
 python server.py
 # 浏览器打开 http://localhost:8080
 ```
+
+功能清单：上传论文/简历 → LLM 解析 → GitHub 搜索 → SQLite 检索。**已停止维护，建议用 v3。**
 
 ---
 
