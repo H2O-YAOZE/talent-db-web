@@ -89,9 +89,16 @@ def save_paper_result(file_path, info):
 
 # ── Resume parsing ──
 
-def process_resume(file_path):
+def process_resume(file_path, fallback_name=""):
     text = read_pdf_text(file_path, max_pages=10)
+
+    # Include filename hint in prompt if available
+    name_hint = ""
+    if fallback_name:
+        name_hint = f"\n注意：此简历的文件名为「{fallback_name}」，如正文无法提取姓名，请以此为候选人姓名。"
+
     prompt = f"""你是一个技术猎头。请从以下简历中提取结构化信息。只返回 JSON 对象，不要其他文字。缺失字段填 null。
+如果正文中找不到姓名，name 字段请留空字符串 ""，不要猜。{name_hint}
 
 简历文本：
 {text[:10000]}
@@ -114,10 +121,13 @@ def process_resume(file_path):
 ```"""
 
     result = call_llm(prompt)
-    if not result: return {"error": "LLM 调用失败"}
+    if not result: return {"name": fallback_name, "error": "LLM 调用失败，使用文件名"}
     try: info = parse_json_from_llm(result)
-    except: return {"error": f"JSON 解析失败: {result[:200]}"}
-    if not info.get("name"): return {"error": "未提取到姓名"}
+    except: return {"name": fallback_name, "error": f"JSON 解析失败: {result[:200]}"}
+
+    # Name resolution: LLM > fallback (filename) > empty
+    if not info.get("name") and fallback_name:
+        info["name"] = fallback_name
 
     # Dedup: name + email + phone
     conn = get_db()

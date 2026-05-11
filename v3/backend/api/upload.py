@@ -1,4 +1,4 @@
-import os, time, json
+import os, time, json, re
 from concurrent.futures import ThreadPoolExecutor
 from fastapi import APIRouter, UploadFile, File, Form
 from database import get_db
@@ -9,6 +9,27 @@ from api.auth import get_user
 
 router = APIRouter(prefix="/api", tags=["upload"])
 executor = ThreadPoolExecutor(max_workers=2)
+
+def extract_name_from_filename(filename):
+    """Extract a candidate name from filename. E.g. '姚杰个人简历.pdf' → '姚杰'"""
+    # Remove extension and common suffixes
+    name = os.path.splitext(filename)[0]
+    for suffix in ['个人简历', '简历', '个人', '的', '最新', '-', '_']:
+        name = name.replace(suffix, ' ')
+    # Try to find 2-4 Chinese character sequences
+    name = name.strip()
+    # Remove leading timestamp (e.g. '1778470344_')
+    name = re.sub(r'^\d+[_\s]*', '', name)
+    # Take first 2-4 Chinese chars as candidate name
+    cn_match = re.search(r'[一-鿿]{2,4}', name)
+    if cn_match:
+        return cn_match.group()
+    # Try 2-4 alphabetic chars
+    en_match = re.search(r'[a-zA-Z]{2,20}', name)
+    if en_match:
+        return en_match.group()
+    return name[:20] if name else ""
+
 
 def process_file_task(file_path, task_type):
     try:
@@ -30,13 +51,16 @@ def process_file_task(file_path, task_type):
                 conn.commit()
                 conn.close()
         else:
-            result = process_resume(file_path)
-            if result.get("name"):
-                conn = get_db()
-                conn.execute("UPDATE candidates SET source_file=?, uploaded_by=?, batch_name=? WHERE name=? AND source='resume' AND source_file IS NULL",
-                             (file_path, uploaded_by, batch_name, result["name"]))
-                conn.commit()
-                conn.close()
+            # Extract name from filename as fallback
+            filename = os.path.basename(file_path)
+            fallback_name = extract_name_from_filename(filename)
+            result = process_resume(file_path, fallback_name)
+            # Always save — even without a name, keep the record
+            conn = get_db()
+            conn.execute("UPDATE candidates SET source_file=?, uploaded_by=?, batch_name=? WHERE name=? AND source='resume' AND source_file IS NULL",
+                         (file_path, uploaded_by, batch_name, result.get("name", "")))
+            conn.commit()
+            conn.close()
         conn = get_db()
         status = "done" if not result.get("error") else "failed"
         conn.execute("UPDATE task_queue SET status=?, finished_at=datetime('now','localtime'), error_message=? WHERE file_path=?",
