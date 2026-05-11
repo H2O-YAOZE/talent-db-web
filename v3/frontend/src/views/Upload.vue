@@ -18,8 +18,11 @@
 
     <div v-if="fileList.length" style="margin-bottom:16px">
       <div style="font-size:14px;font-weight:600;margin-bottom:8px">待上传文件（{{ fileList.length }} 个）</div>
-      <el-button type="primary" @click="doUpload" :loading="uploading">开始上传并自动处理</el-button>
-      <el-button @click="fileList = []">清空</el-button>
+      <el-input v-model="batchName" placeholder="批次名称（如：腾讯元宝T10+、ACL2026）" style="width:320px;margin-bottom:8px" clearable />
+      <div>
+        <el-button type="primary" @click="doUpload" :loading="uploading">开始上传并自动处理</el-button>
+        <el-button @click="fileList = []">清空</el-button>
+      </div>
     </div>
 
     <el-alert v-if="results.length" title="上传结果" type="success" style="margin-top:16px">
@@ -39,13 +42,15 @@ import { ElMessage } from 'element-plus'
 const fileList = ref([])
 const uploading = ref(false)
 const results = ref([])
+const batchName = ref('')
 
-const onChange = () => {}  // just for attachment tracking
+const onChange = () => {}
 
 const doUpload = async () => {
   if (!fileList.value.length) return
   uploading.value = true
   const formData = new FormData()
+  if (batchName.value) formData.append('batch_name', batchName.value)
   fileList.value.forEach((f) => {
     formData.append('files', f.raw)
   })

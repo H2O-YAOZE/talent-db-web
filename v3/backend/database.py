@@ -86,12 +86,15 @@ def ensure_tables():
         for col, typ in [
             ("degree", "TEXT"), ("phone", "TEXT"), ("paper_id", "INTEGER"),
             ("source_file", "TEXT"), ("tags", "TEXT"), ("summary", "TEXT"),
-            ("uploaded_by", "TEXT"), ("raw_data", "TEXT"),
+            ("uploaded_by", "TEXT"), ("batch_name", "TEXT"), ("raw_data", "TEXT"),
         ]:
             try: conn.execute(f"ALTER TABLE candidates ADD COLUMN {col} {typ}")
             except: pass
-        for col, typ in [("raw_data", "TEXT"), ("uploaded_by", "TEXT")]:
+        for col, typ in [("raw_data", "TEXT"), ("uploaded_by", "TEXT"), ("batch_name", "TEXT")]:
             try: conn.execute(f"ALTER TABLE papers ADD COLUMN {col} {typ}")
+            except: pass
+        for col, typ in [("batch_name", "TEXT")]:
+            try: conn.execute(f"ALTER TABLE task_queue ADD COLUMN {col} {typ}")
             except: pass
         # Indexes (after columns exist)
         for idx in [

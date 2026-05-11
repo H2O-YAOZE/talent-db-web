@@ -34,6 +34,7 @@ export const api = {
   deleteCandidate: (id) => request('DELETE', `/api/candidates/${id}`),
   getCompanies: () => request('GET', '/api/companies'),
   getDegrees: () => request('GET', '/api/degrees'),
+  getUploaders: () => request('GET', '/api/uploaders'),
 
   // Papers
   listPapers: (params = {}) => {

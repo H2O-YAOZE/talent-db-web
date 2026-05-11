@@ -16,6 +16,9 @@
       <el-select v-model="company" placeholder="公司" clearable filterable style="width:200px" @change="search">
         <el-option v-for="c in companies" :key="c.company" :label="`${c.company} (${c.count})`" :value="c.company" />
       </el-select>
+      <el-select v-model="uploader" placeholder="上传人" clearable style="width:140px" @change="search">
+        <el-option v-for="u in uploaders" :key="u.uploader" :label="`${u.uploader} (${u.count})`" :value="u.uploader" />
+      </el-select>
       <span style="color:#999;font-size:13px;line-height:32px">共 {{ total }} 人</span>
     </div>
 
@@ -30,7 +33,9 @@
         </template>
       </el-table-column>
       <el-table-column prop="degree" label="学历" width="80" />
-      <el-table-column prop="institution" label="学校" width="180" />
+      <el-table-column prop="institution" label="学校" width="150" />
+      <el-table-column prop="batch_name" label="批次" width="120" />
+      <el-table-column prop="uploaded_by" label="上传人" width="80" />
       <el-table-column label="技能" min-width="200">
         <template #default="{ row }">
           <el-tag v-for="s in (row.skills || []).slice(0,5)" :key="s" size="small" style="margin:1px">{{ s }}</el-tag>
@@ -69,6 +74,7 @@ const degree = ref('')
 const company = ref('')
 const companies = ref([])
 const degrees = ref([])
+const uploaders = ref([])
 const loading = ref(false)
 
 const getLatestCompany = (row) => {
@@ -82,6 +88,7 @@ const loadData = async () => {
   if (keyword.value) params.keyword = keyword.value
   if (degree.value) params.degree = degree.value
   if (company.value) params.company = company.value
+  if (uploader.value) params.uploader = uploader.value
   const resp = await api.listCandidates(params)
   if (resp && resp.data) {
     list.value = resp.data
@@ -98,9 +105,10 @@ const del = async (id) => {
 }
 
 onMounted(async () => {
-  const [compRes, degRes] = await Promise.all([api.getCompanies(), api.getDegrees()])
+  const [compRes, degRes, upRes] = await Promise.all([api.getCompanies(), api.getDegrees(), api.getUploaders()])
   companies.value = compRes?.data || []
   degrees.value = degRes?.data || []
+  uploaders.value = upRes?.data || []
   loadData()
 })
 </script>
