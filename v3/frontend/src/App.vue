@@ -27,6 +27,7 @@
       </el-menu>
       <div style="position:absolute;bottom:0;width:200px;padding:16px;border-top:1px solid rgba(255,255,255,.1);font-size:12px;color:#a0aec0">
         👤 {{ username }}
+        <el-tag v-if="role === 'admin'" size="small" type="danger" style="margin-left:4px">管理员</el-tag>
         <el-button text size="small" style="color:#e74c3c;margin-left:8px" @click="logout">退出</el-button>
       </div>
     </el-aside>
@@ -44,6 +45,7 @@ const router = useRouter()
 const route = useRoute()
 const token = ref(localStorage.getItem('token') || '')
 const username = ref(localStorage.getItem('username') || '')
+const role = ref(localStorage.getItem('role') || '')
 
 const handleMenuSelect = (index) => router.push(index)
 

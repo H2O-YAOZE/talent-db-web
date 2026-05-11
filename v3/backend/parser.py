@@ -115,8 +115,9 @@ def process_resume(file_path, fallback_name=""):
   "work_experience": [{{"company": "公司", "role": "职位", "duration": "时长"}}],
   "skills": ["技能1", "技能2"],
   "github_username": "GitHub用户名（如简历中提到）",
-  "github_url": "GitHub链接",
-  "research_field": "研究方向/工作领域"
+  "github_url": "GitHub个人主页链接（如简历中提到）",
+  "research_field": "研究方向/工作领域",
+  "social_links": [{{"platform": "平台名(如小红书/微博/知乎/LinkedIn/个人网站等)", "url": "链接"}}]
 }}
 ```"""
 
@@ -129,15 +130,32 @@ def process_resume(file_path, fallback_name=""):
     if not info.get("name") and fallback_name:
         info["name"] = fallback_name
 
+    # GitHub: if not found in resume text, search actively
+    if not info.get("github_url") and not info.get("github_username"):
+        author_info = {
+            "name": info.get("name", ""),
+            "email": info.get("email", ""),
+            "institution": info.get("institution", ""),
+        }
+        gh_result = search_github_author(author_info)
+        if gh_result:
+            info["github_username"] = gh_result.get("github_username", "")
+            info["github_url"] = gh_result.get("github_url", "")
+            info["match_confidence"] = gh_result.get("github_match", "medium")
+
     # Sanitize GitHub URL: ensure it's a profile URL, not a repo URL
     gh_url = info.get("github_url", "")
-    if gh_url and "/github.com/" in gh_url:
-        parts = gh_url.split("/github.com/")[-1].split("/")
-        if parts:
-            username = parts[0]
-            info["github_url"] = f"https://github.com/{username}"
+    if gh_url and "github.com" in gh_url:
+        parts = gh_url.split("github.com/")[-1].split("/")
+        if parts and parts[0]:
+            info["github_url"] = f"https://github.com/{parts[0]}"
             if not info.get("github_username"):
-                info["github_username"] = username
+                info["github_username"] = parts[0]
+
+    # Store social links as JSON
+    social_links = info.pop("social_links", []) or []
+    if social_links:
+        info["social_links"] = json.dumps(social_links, ensure_ascii=False)
 
     # Dedup: name + email + phone
     conn = get_db()

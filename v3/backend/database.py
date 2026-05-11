@@ -87,6 +87,7 @@ def ensure_tables():
             ("degree", "TEXT"), ("phone", "TEXT"), ("paper_id", "INTEGER"),
             ("source_file", "TEXT"), ("tags", "TEXT"), ("summary", "TEXT"),
             ("uploaded_by", "TEXT"), ("batch_name", "TEXT"), ("raw_data", "TEXT"),
+            ("social_links", "TEXT"),
         ]:
             try: conn.execute(f"ALTER TABLE candidates ADD COLUMN {col} {typ}")
             except: pass

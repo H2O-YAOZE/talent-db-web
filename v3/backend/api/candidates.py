@@ -44,7 +44,7 @@ def list_candidates(
     data = []
     for r in rows:
         d = dict(r)
-        for f in ["education", "work_experience", "skills"]:
+        for f in ["education", "work_experience", "skills", "social_links"]:
             try: d[f] = json.loads(d[f]) if d[f] else []
             except: d[f] = []
         data.append(d)
@@ -59,7 +59,7 @@ def candidate_detail(cid: int, username: str = __import__('fastapi').Depends(get
     if not row:
         return {"error": "Not found"}
     d = dict(row)
-    for f in ["education", "work_experience", "skills"]:
+    for f in ["education", "work_experience", "skills", "social_links"]:
         try: d[f] = json.loads(d[f]) if d[f] else []
         except: d[f] = []
     return d
