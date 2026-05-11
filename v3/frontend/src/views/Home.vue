@@ -16,21 +16,19 @@
       <el-select v-model="company" placeholder="公司" clearable filterable style="width:200px" @change="search">
         <el-option v-for="c in companies" :key="c.company" :label="`${c.company} (${c.count})`" :value="c.company" />
       </el-select>
-      <el-select v-model="uploader" placeholder="上传人" clearable style="width:140px" @change="search">
-        <el-option v-for="u in uploaders" :key="u.uploader" :label="`${u.uploader} (${u.count})`" :value="u.uploader" />
+      <el-select v-model="uploaderFilter" placeholder="上传人" clearable style="width:140px" @change="search">
+        <el-option v-for="u in uploaderList" :key="u.uploader" :label="`${u.uploader} (${u.count})`" :value="u.uploader" />
       </el-select>
       <span style="color:#999;font-size:13px;line-height:32px">共 {{ total }} 人</span>
     </div>
 
     <!-- Table -->
-    <el-table :data="list" stripe style="width:100%" @row-click="(row) => $router.push(`/candidate/${row.id}`)" v-loading="loading">
+    <el-table :data="list" stripe style="width:100%" v-loading="loading">
       <el-table-column prop="name" label="姓名" width="100" />
       <el-table-column prop="email" label="邮箱" width="200" />
       <el-table-column prop="phone" label="电话" width="130" />
       <el-table-column label="最近公司" width="200">
-        <template #default="{ row }">
-          {{ getLatestCompany(row) }}
-        </template>
+        <template #default="{ row }">{{ getCompany(row) }}</template>
       </el-table-column>
       <el-table-column prop="degree" label="学历" width="80" />
       <el-table-column prop="institution" label="学校" width="150" />
@@ -46,16 +44,16 @@
       </el-table-column>
       <el-table-column label="操作" width="80" fixed="right">
         <template #default="{ row }">
+          <el-button type="primary" text size="small" @click="goDetail(row.id)">详情</el-button>
           <el-popconfirm title="确定删除？" @confirm="del(row.id)">
             <template #reference>
-              <el-button type="danger" text size="small" @click.stop>删除</el-button>
+              <el-button type="danger" text size="small">删除</el-button>
             </template>
           </el-popconfirm>
         </template>
       </el-table-column>
     </el-table>
 
-    <!-- Pagination -->
     <div style="margin-top:16px;text-align:center">
       <el-pagination v-model:current-page="page" :total="total" :page-size="50" layout="prev, pager, next" @current-change="loadData" />
     </div>
@@ -64,23 +62,29 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { api } from '../api'
 
+const router = useRouter()
 const list = ref([])
 const total = ref(0)
 const page = ref(1)
 const keyword = ref('')
 const degree = ref('')
 const company = ref('')
+const uploaderFilter = ref('')
 const companies = ref([])
 const degrees = ref([])
-const uploaders = ref([])
+const uploaderList = ref([])
 const loading = ref(false)
 
-const getLatestCompany = (row) => {
-  if (!row.work_experience || !row.work_experience.length) return ''
-  return row.work_experience[0]?.company || ''
+const getCompany = (row) => {
+  const exps = row.work_experience
+  if (!exps || !exps.length) return ''
+  return exps[0]?.company || ''
 }
+
+const goDetail = (id) => router.push(`/candidate/${id}`)
 
 const loadData = async () => {
   loading.value = true
@@ -89,14 +93,14 @@ const loadData = async () => {
     if (keyword.value) params.keyword = keyword.value
     if (degree.value) params.degree = degree.value
     if (company.value) params.company = company.value
-    if (uploader.value) params.uploader = uploader.value
+    if (uploaderFilter.value) params.uploader = uploaderFilter.value
     const resp = await api.listCandidates(params)
-    if (resp && resp.data) {
+    if (resp?.data) {
       list.value = resp.data
       total.value = resp.total
     }
   } catch (e) {
-    console.error('Load candidates failed:', e)
+    console.error(e)
   }
   loading.value = false
 }
@@ -109,10 +113,14 @@ const del = async (id) => {
 }
 
 onMounted(async () => {
-  const [compRes, degRes, upRes] = await Promise.all([api.getCompanies(), api.getDegrees(), api.getUploaders()])
-  companies.value = compRes?.data || []
-  degrees.value = degRes?.data || []
-  uploaders.value = upRes?.data || []
+  try {
+    const [compRes, degRes, upRes] = await Promise.all([
+      api.getCompanies(), api.getDegrees(), api.getUploaders()
+    ])
+    companies.value = compRes?.data || []
+    degrees.value = degRes?.data || []
+    uploaderList.value = upRes?.data || []
+  } catch (e) { console.error(e) }
   loadData()
 })
 </script>
