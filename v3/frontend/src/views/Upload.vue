@@ -18,9 +18,10 @@
 
     <div v-if="fileList.length" style="margin-bottom:16px">
       <div style="font-size:14px;font-weight:600;margin-bottom:8px">待上传文件（{{ fileList.length }} 个）</div>
+      <el-input v-model="uploaderName" placeholder="上传人姓名（必填，如：张三）" style="width:240px;margin-bottom:8px" />
       <el-input v-model="batchName" placeholder="批次名称（如：腾讯元宝T10+、ACL2026）" style="width:320px;margin-bottom:8px" clearable />
       <div>
-        <el-button type="primary" @click="doUpload" :loading="uploading">开始上传并自动处理</el-button>
+        <el-button type="primary" @click="doUpload" :loading="uploading" :disabled="!uploaderName.trim()">开始上传并自动处理</el-button>
         <el-button @click="fileList = []">清空</el-button>
       </div>
     </div>
@@ -42,14 +43,16 @@ import { ElMessage } from 'element-plus'
 const fileList = ref([])
 const uploading = ref(false)
 const results = ref([])
+const uploaderName = ref('')
 const batchName = ref('')
 
 const onChange = () => {}
 
 const doUpload = async () => {
-  if (!fileList.value.length) return
+  if (!fileList.value.length || !uploaderName.value.trim()) return
   uploading.value = true
   const formData = new FormData()
+  formData.append('uploader_name', uploaderName.value.trim())
   if (batchName.value) formData.append('batch_name', batchName.value)
   fileList.value.forEach((f) => {
     formData.append('files', f.raw)

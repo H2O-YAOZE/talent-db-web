@@ -1,7 +1,8 @@
-import hashlib, sys
+import hashlib, sys, os
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 from database import ensure_tables, get_db
 from config import SECRET_KEY
 from api.auth import router as auth_router
@@ -52,6 +53,11 @@ app.include_router(upload_router)
 app.include_router(candidates_router)
 app.include_router(papers_router)
 app.include_router(tasks_router)
+
+# Serve built frontend (if exists)
+frontend_dist = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "frontend", "dist")
+if os.path.exists(frontend_dist):
+    app.mount("/", StaticFiles(directory=frontend_dist, html=True), name="frontend")
 
 if __name__ == "__main__":
     import uvicorn

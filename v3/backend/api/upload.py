@@ -58,8 +58,10 @@ def submit_process(file_path, task_type):
     executor.submit(process_file_task, file_path, task_type)
 
 @router.post("/upload")
-async def upload(files: list[UploadFile] = File(...), batch_name: str = Form(""),
+async def upload(files: list[UploadFile] = File(...), uploader_name: str = Form(""), batch_name: str = Form(""),
                  username: str = __import__('fastapi').Depends(get_user)):
+    if not uploader_name.strip():
+        return {"error": "请填写上传人姓名"}
     conn = get_db()
     pending_count = conn.execute("SELECT COUNT(*) FROM task_queue WHERE status IN ('pending','processing')").fetchone()[0]
     if pending_count >= 10:
@@ -76,7 +78,8 @@ async def upload(files: list[UploadFile] = File(...), batch_name: str = Form("")
             continue
 
         # Save to uploader's subdirectory
-        uploader_dir = os.path.join(UPLOAD_DIR, username, batch_name.replace("/", "_") if batch_name else "_unsorted")
+        uploader = uploader_name.strip()
+        uploader_dir = os.path.join(UPLOAD_DIR, uploader, batch_name.replace("/", "_") if batch_name else "_unsorted")
         os.makedirs(uploader_dir, exist_ok=True)
 
         ext = os.path.splitext(f.filename)[1].lower()
@@ -90,13 +93,13 @@ async def upload(files: list[UploadFile] = File(...), batch_name: str = Form("")
         task_type = classify_file(tmp_path)
 
         # Move to correct subdirectory under uploader
-        subdir = os.path.join(UPLOAD_DIR, task_type + "s", username, batch_name.replace("/", "_") if batch_name else "_unsorted")
+        subdir = os.path.join(UPLOAD_DIR, task_type + "s", uploader, batch_name.replace("/", "_") if batch_name else "_unsorted")
         os.makedirs(subdir, exist_ok=True)
         final_path = os.path.join(subdir, safe_name)
         os.rename(tmp_path, final_path)
 
         conn.execute("INSERT INTO task_queue (file_path, task_type, status, uploaded_by, batch_name) VALUES (?, ?, 'pending', ?, ?)",
-                     (final_path, task_type, username, batch_name or ""))
+                     (final_path, task_type, uploader, batch_name or ""))
         results.append({"file": f.filename, "type": task_type, "status": "queued"})
 
     conn.commit()
