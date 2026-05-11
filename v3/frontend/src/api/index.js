@@ -45,7 +45,10 @@ export const api = {
   getSchools: () => request('GET', '/api/papers/schools'),
 
   // Upload & Tasks
-  upload: (formData) => fetch(BASE + '/api/upload', { method: 'POST', headers: { 'Authorization': `Bearer ${localStorage.getItem('token') || ''}` }, body: formData }),
+  upload: async (formData) => {
+    const resp = await fetch(BASE + '/api/upload', { method: 'POST', headers: { 'Authorization': `Bearer ${localStorage.getItem('token') || ''}` }, body: formData })
+    return resp.json()
+  },
   processPending: () => request('POST', '/api/tasks/process'),
   listTasks: () => request('GET', '/api/tasks'),
   deleteTask: (id) => request('DELETE', `/api/tasks/${id}`),
