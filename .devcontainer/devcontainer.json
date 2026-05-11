@@ -8,8 +8,12 @@
       "onAutoForward": "openBrowser"
     }
   },
+  "containerEnv": {
+    "TALENT_LLM_API_KEY": "${localEnv:TALENT_LLM_API_KEY}",
+    "TALENT_SECRET_KEY": "${localEnv:TALENT_SECRET_KEY}"
+  },
   "postCreateCommand": "pip install -r requirements.txt && mkdir -p ~/projects/talent-db/data ~/projects/talent-db/input/papers ~/projects/talent-db/input/resumes",
-  "postStartCommand": "echo '🚀 启动人才数据库...' && python server.py",
+  "postStartCommand": "python server.py",
   "customizations": {
     "codespaces": {
       "openFiles": ["README.md"]
