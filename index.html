@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>🎯 人才数据库</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'PingFang SC',sans-serif;background:#f0f2f5;color:#333;font-size:13px}
+button{cursor:pointer;border:none;font-family:inherit}
+input{font-family:inherit}
+.login-bg{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#667eea,#764ba2)}
+.login-box{background:#fff;border-radius:14px;padding:40px 36px;width:360px;box-shadow:0 20px 50px rgba(0,0,0,.15);text-align:center}
+.login-box h1{font-size:22px;margin-bottom:4px}.login-box .sub{color:#999;font-size:12px;margin-bottom:20px}
+.login-box input{width:100%;padding:10px 14px;border:1px solid #ddd;border-radius:8px;margin-bottom:10px;font-size:14px}
+.login-box input:focus{border-color:#667eea;outline:none}
+.btn{padding:8px 16px;border-radius:6px;font-size:13px;font-weight:500;transition:.15s}
+.btn-p{background:#667eea;color:#fff}.btn-p:hover{background:#5a6fd6}
+.btn-s{background:#fff;color:#333;border:1px solid #ddd}.btn-s:hover{border-color:#667eea;color:#667eea}
+.btn-sm{padding:5px 10px;font-size:12px}.btn-d{background:#fff;color:#e74c3c;border:1px solid #ddd}.btn-d:hover{background:#fef2f2}
+.btn-g{background:#ecfdf5;color:#059669;border:1px solid #a7f3d0}.btn-g:hover{background:#d1fae5}
+.tag{display:inline-block;padding:2px 8px;border-radius:4px;font-size:11px;font-weight:500}
+.tag-g{background:#ecfdf5;color:#059669}.tag-y{background:#fffbeb;color:#d97706}
+.tag-b{background:#eef2ff;color:#4f46e5}.tag-r{background:#fef2f2;color:#dc2626}.tag-gray{background:#f3f4f6;color:#9ca3af}
+.layout{display:flex;height:100vh}
+.side{width:200px;background:#1d1e2c;color:#fff;display:flex;flex-direction:column;flex-shrink:0}
+.side .logo{padding:18px;font-size:15px;font-weight:700;border-bottom:1px solid rgba(255,255,255,.06)}
+.side .logo em{color:#a78bfa;font-style:normal}
+.side nav{flex:1;padding:6px 0}
+.side nav div{padding:10px 18px;cursor:pointer;color:rgba(255,255,255,.5);font-size:13px;transition:.15s}
+.side nav div:hover{color:#fff;background:rgba(255,255,255,.04)}
+.side nav div.on{color:#fff;background:rgba(167,139,250,.1);border-right:3px solid #a78bfa}
+.side .foot{padding:12px 18px;border-top:1px solid rgba(255,255,255,.06);font-size:12px;display:flex;justify-content:space-between}
+.side .foot span:last-child{cursor:pointer;color:rgba(255,255,255,.35)}
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden}
+.top{height:48px;background:#fff;border-bottom:1px solid #eee;display:flex;align-items:center;justify-content:space-between;padding:0 20px;flex-shrink:0}
+.top h2{font-size:14px;font-weight:600}
+.body{flex:1;padding:16px;overflow-y:auto}
+.up-zone{border:2px dashed #d9d9d9;border-radius:10px;padding:36px;text-align:center;cursor:pointer;background:#fff;margin-bottom:14px;transition:.2s}
+.up-zone:hover{border-color:#667eea}.up-zone .big{font-size:36px;margin-bottom:6px}
+.tbl-wrap{background:#fff;border-radius:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+table{width:100%;border-collapse:collapse}
+th{background:#f8f9fa;padding:10px 14px;text-align:left;font-weight:600;font-size:12px;color:#888;border-bottom:1px solid #eee;white-space:nowrap}
+td{padding:10px 14px;border-bottom:1px solid #f5f5f5;font-size:12px;vertical-align:top}
+td a{color:#667eea;text-decoration:none}td a:hover{text-decoration:underline}
+tr:hover td{background:#fafafe}
+.paper-card{background:#fff;border-radius:10px;padding:16px 20px;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,.04)}
+.paper-card .hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.paper-card .title{font-size:14px;font-weight:600}.paper-card .meta{font-size:11px;color:#999;display:flex;gap:12px;margin-bottom:10px}
+.paper-card .authors{display:flex;gap:6px;flex-wrap:wrap}
+.paper-card .author-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 10px;border-radius:6px;background:#f8f9fa;font-size:12px;border:1px solid #eee}
+.paper-card .author-chip .gh{color:#667eea;font-size:11px}
+.paper-card .author-chip.matched{background:#ecfdf5;border-color:#a7f3d0}
+.tsk{display:flex;align-items:center;gap:10px;padding:8px 12px;background:#fff;border-radius:6px;margin-bottom:4px;font-size:12px}
+.tsk .fn{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mask{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:100;display:none}.mask.show{display:block}
+.drawer{position:fixed;top:0;right:-420px;bottom:0;width:420px;background:#fff;z-index:101;transition:right .3s;overflow-y:auto;padding:20px}
+.drawer.show{right:0}.drawer h3{font-size:16px;margin-bottom:12px}
+.drawer .field{margin-bottom:6px;font-size:12px;color:#555}
+.drawer .sep{border-top:1px solid #f0f0f0;margin:12px 0}
+.drawer .label{color:#999;font-size:11px;margin-bottom:4px}
+.toast{position:fixed;top:16px;right:16px;z-index:200;padding:10px 18px;border-radius:8px;color:#fff;font-size:13px;opacity:0;transition:.3s;pointer-events:none}
+.toast.show{opacity:1}.toast-ok{background:#10b981}.toast-err{background:#ef4444}
+.empty{text-align:center;padding:48px;color:#ccc;font-size:13px}.empty .big{font-size:40px;margin-bottom:6px}
+.filters{display:flex;gap:8px;margin-bottom:12px;align-items:center}
+.filters input{width:240px;padding:7px 10px;border:1px solid #ddd;border-radius:6px;font-size:12px}
+.filters input:focus{border-color:#667eea;outline:none}
+.sk-list{display:flex;gap:3px;flex-wrap:wrap}
+.ch{color:#10b981}.cm{color:#f59e0b}.cl{color:#f97316}.cu{color:#aaa}
+
+/* Modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:200;justify-content:center;align-items:center}
+.modal-overlay.show{display:flex}
+.modal{background:#fff;border-radius:16px;padding:28px 32px;max-width:480px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.modal h3{font-size:18px;margin-bottom:12px;color:#667eea}
+.modal p{font-size:14px;color:#666;line-height:1.7;margin-bottom:20px}
+.modal button{background:#667eea;color:white;border:none;padding:10px 32px;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer}
+.modal button:hover{background:#5a6fd6}
+.fb-area textarea{width:100%;background:#f8f9fa;border:1px solid #e0e0e0;border-radius:8px;padding:10px 14px;color:#333;font-size:13px;resize:vertical;min-height:60px;outline:none;font-family:inherit;box-sizing:border-box}
+.fb-area textarea:focus{border-color:#667eea}
+.fb-area button{width:100%;margin-top:6px;background:#667eea;color:#fff;border:none;padding:8px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer}
+.fb-area button:hover{background:#5a6fd6}
+
+@media(max-width:768px){
+.layout{flex-direction:column}
+.side{width:100%;position:fixed;bottom:0;left:0;right:0;height:auto;max-height:60vh;overflow-y:auto;z-index:50;transform:translateY(100%);transition:transform .3s;border-radius:16px 16px 0 0}
+.side.open{transform:translateY(0)}
+.side .foot{display:none}
+.main{width:100%}
+.top{padding:0 12px}
+.top h2{font-size:13px}
+.body{padding:10px}
+.filters input{width:120px}
+.up-zone{padding:20px}
+.hamburger{display:block!important;position:fixed;bottom:16px;right:16px;z-index:60;width:48px;height:48px;border-radius:50%;background:#667eea;color:#fff;font-size:22px;text-align:center;line-height:48px;box-shadow:0 4px 12px rgba(102,126,234,.4)}
+.hamburger:active{transform:scale(.95)}
+.mask-m{display:none!important;position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:49}
+.mask-m.show{display:block!important}
+.paper-card{padding:12px 14px}
+.tbl-wrap{border-radius:8px;overflow-x:auto}
+table{min-width:600px}
+.drawer{width:100%;right:-100%}
+}
+.hamburger{display:none}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div class="toast" id="toast"></div>
+<div class="mask" id="mask" onclick="closeDrawer()"></div>
+<div class="drawer" id="drawer"></div>
+<script>
+var T=localStorage.getItem('tdb_tk')||'';
+var U=localStorage.getItem('tdb_u')||'';
+var PG='papers';
+var S={papers:[],resumes:[],tasks:[],pTotal:0,rTotal:0,kw:''};
+
+function api(m,u,d){
+  return new Promise(function(ok){
+    var x=new XMLHttpRequest();x.open(m,u);
+    x.setRequestHeader('Content-Type','application/json');
+    if(T)x.setRequestHeader('Authorization','Bearer '+T);
+    x.onload=function(){if(x.status===401){doLogout();return;}try{ok(JSON.parse(x.responseText));}catch(e){ok({error:e.message});}};
+    x.onerror=function(){ok({error:'网络错误'});};
+    if(d!==undefined)x.send(JSON.stringify(d));else x.send();
+  });
+}
+function toast(msg,type){var t=document.getElementById('toast');t.textContent=msg;t.className='toast toast-'+(type||'ok')+' show';setTimeout(function(){t.className='toast';},2500);}
+function esc(s){var d=document.createElement('div');d.textContent=s||'';return d.innerHTML;}
+function fmtSz(b){return b<1024?b+'B':b<1048576?(b/1024).toFixed(1)+'KB':(b/1048576).toFixed(1)+'MB';}
+function confT(c){return{high:'高',medium:'中',low:'低',unmatched:'未匹配',manual:'手动'}[c]||'';}
+function confC(c){return{high:'ch',medium:'cm',low:'cl',unmatched:'cu',manual:''}[c]||'cu';}
+
+function doLogin(){
+  var u=document.getElementById('lu').value,p=document.getElementById('lp').value;
+  if(!u||!p)return;
+  api('POST','/api/auth/login',{username:u,password:p}).then(function(r){
+    if(r.error){toast(r.error,'err');return;}
+    T=r.token;U=r.username;localStorage.setItem('tdb_tk',T);localStorage.setItem('tdb_u',U);
+    toast('登录成功');render();
+  });
+}
+function doLogout(){T='';U='';localStorage.removeItem('tdb_tk');localStorage.removeItem('tdb_u');render();}
+
+// ========== Data Loading ==========
+function loadPapers(){
+  api('GET','/api/papers?keyword='+encodeURIComponent(S.kw||'')).then(function(r){
+    if(r.error)return;S.papers=r.data||[];S.pTotal=r.total;renderPapers();
+  });
+}
+function loadResumes(){
+  api('GET','/api/resumes?page=1&size=100&keyword='+encodeURIComponent(S.kw||'')).then(function(r){
+    if(r.error)return;S.resumes=r.data||[];S.rTotal=r.total;renderResumes();
+  });
+}
+function loadTasks(){
+  api('GET','/api/tasks').then(function(r){if(r.error)return;S.tasks=r.data||[];renderTasks();});
+}
+
+// ========== Paper View (Grouped) ==========
+function renderPapers(){
+  var cols=['论文标题','团队','研究方向','作者','GitHub','文件','时间'];
+  var thead='<tr>'+cols.map(function(c){return '<th>'+c+'</th>';}).join('')+'<th></th></tr>';
+  var tbody=S.papers.map(function(p){
+    var authors=p.authors||[];
+    var matched=authors.filter(function(a){return a.github_url;});
+    var names=authors.map(function(a){return esc(a.name);}).join('、')||'—';
+    var ghList=matched.map(function(a){return '<a href="'+esc(a.github_url)+'" target="_blank" style="font-size:11px" title="'+esc(a.name)+'">'+esc(a.github_username||'GH')+'</a>';}).join(' ')||'—';
+    var fn=(p.file_path||'').split('/').pop();
+    var tid=p.task_id||'';
+    var titleCell=tid
+      ?'<a href="javascript:void(0)" onclick="downloadFile('+tid+')" style="color:#333;text-decoration:none">'+esc(p.title||fn)+'</a>'
+      :'<span>'+esc(p.title||fn)+'</span>';
+    return '<tr>'
+      +'<td style="max-width:200px">'+titleCell+'</td>'
+      +'<td style="font-size:11px">'+esc(p.team||'—')+'</td>'
+      +'<td style="font-size:11px;color:#667eea">'+esc(p.direction||'—')+'</td>'
+      +'<td style="font-size:11px;max-width:180px">'+names+'</td>'
+      +'<td style="font-size:11px">'+ghList+'</td>'
+      +'<td>'+(tid?'<button class="btn btn-g btn-sm" onclick="downloadFile('+tid+')">📥</button>':'—')+'</td>'
+      +'<td style="color:#bbb;font-size:11px">'+esc(p.upload_time||'')+'</td>'
+      +'<td><button class="btn btn-d btn-sm" onclick="deletePaper('+p.id+')">🗑️</button></td>'
+      +'</tr>';
+  }).join('');
+  var uploadHint='上传论文（PDF），自动提取标题+团队+方向+作者并搜索 GitHub';
+  var bodyHtml=tbody||'<tr><td colspan="'+(cols.length+1)+'" style="text-align:center;padding:32px;color:#ccc">暂无论文</td></tr>';
+  document.getElementById('app').innerHTML=layout('📄 论文库',uploadHint,'paper',
+    '<div class="tbl-wrap"><table>'+thead+'<tbody>'+bodyHtml+'</tbody></table></div>');
+}
+
+// ========== Resume View ==========
+function renderResumes(){
+  var cols=['姓名','邮箱','电话','学校','公司/职位','技能','GitHub','时间'];
+  var thead='<tr>'+cols.map(function(c){return '<th>'+c+'</th>';}).join('')+'<th></th></tr>';
+  var tbody=S.resumes.map(function(d){
+    var skills=(d.skills||[]).slice(0,5).map(function(s){return '<span class="tag tag-gray">'+esc(s)+'</span>';}).join('');
+    var works=(d.work_experience||[]).slice(0,2).map(function(w){return esc(w.company||'')+' · '+esc(w.role||'');}).join('；');
+    var gh=d.github_url?'<a href="'+esc(d.github_url)+'" target="_blank">'+esc(d.github_username||'GitHub')+'</a>':'—';
+    return '<tr>'
+      +'<td>'+(d.task_id?'<a href="javascript:void(0)" onclick="downloadFile('+d.task_id+')"><b>'+esc(d.name)+'</b></a>':'<b>'+esc(d.name)+'</b>')+'</td>'
+      +'<td>'+(d.email?'<a href="mailto:'+esc(d.email)+'">'+esc(d.email)+'</a>':'—')+'</td>'
+      +'<td>'+esc(d.phone||'—')+'</td>'
+      +'<td>'+esc(d.institution||'—')+'</td>'
+      +'<td>'+esc(works||'—')+'</td>'
+      +'<td><div class="sk-list">'+(skills||'—')+'</div></td>'
+      +'<td>'+gh+'</td>'
+      +'<td style="color:#bbb;font-size:11px">'+esc(d.created_at||'')+'</td>'
+      +'<td><button class="btn btn-s btn-sm" onclick="openDetail('+d.id+')">详情</button> '
+      +'<button class="btn btn-d btn-sm" onclick="delCand('+d.id+')">🗑️</button></td>'
+      +'</tr>';
+  }).join('');
+  var uploadHint='上传简历（PDF），自动解析结构化信息';
+  var bodyHtml=tbody||'<tr><td colspan="'+(cols.length+1)+'" style="text-align:center;padding:32px;color:#ccc">暂无数据</td></tr>';
+  document.getElementById('app').innerHTML=
+    layout('📋 简历库',uploadHint,'resume',
+      '<div class="tbl-wrap" style="overflow-x:auto"><table>'+thead+'<tbody>'+bodyHtml+'</tbody></table></div>');
+}
+
+// ========== Tasks View ==========
+function renderTasks(){
+  var html=S.tasks.map(function(t){
+    var st={pending:'待处理',processing:'处理中',done:'已完成',failed:'失败'}[t.status]||t.status;
+    var sc={pending:'tag-gray',processing:'tag-y',done:'tag-g',failed:'tag-r'}[t.status]||'tag-gray';
+    var fn=(t.file_path||'').split('/').pop();
+    return '<div class="tsk"><span class="fn">'+esc(fn)+'</span>'
+      +'<span class="tag tag-b">'+(t.task_type==='paper'?'论文':'简历')+'</span>'
+      +'<span class="tag '+sc+'">'+st+'</span>'
+      +(t.error_message?'<span style="color:#e74c3c;font-size:11px" title="'+esc(t.error_message)+'">⚠️</span>':'')
+      +'<span style="color:#bbb;font-size:11px">'+esc(t.created_at||'')+'</span>'
+      +'<span style="flex:1"></span>'
+      +'<button class="btn btn-s btn-sm" onclick="downloadTask('+t.id+')">📥</button> '
+      +'<button class="btn btn-d btn-sm" onclick="deleteFile('+t.id+')">🗑️</button>'
+      +'</div>';
+  }).join('');
+  document.getElementById('app').innerHTML=
+    layout('⚙️ 处理队列','','',
+    +'<div style="margin-top:auto;padding:8px 12px"><div class="fb-area"><textarea id="feedbackText" placeholder="💡 有什么建议？"></textarea><button onclick="submitFeedback()">提交意见</button></div></div>'+
+      '<div style="margin-bottom:12px"><button class="btn btn-p btn-sm" onclick="processPending()">🔄 处理所有待处理任务</button></div>'
+      +(html||'<div class="empty"><div class="big">📋</div>暂无任务</div>'));
+}
+
+// ========== Layout Helper ==========
+function layout(title,uploadHint,type,content){
+  var fiId=type+'Fi';
+  return '<div class="layout"><div class="hamburger" onclick="toggleSide()">☰</div><div class="mask-m" id="maskM" onclick="toggleSide()"></div><div class="side">'
+    +'<div class="logo">🎯 人才<em>数据库</em></div>'
+    +'<nav>'
+    +'<div class="'+(PG==='papers'?'on':'')+'" onclick="PG=\'papers\';S.kw=\'\';render()">📄 论文库 <span class="tag tag-b" style="margin-left:4px">'+S.pTotal+'</span></div>'
+    +'<div class="'+(PG==='resumes'?'on':'')+'" onclick="PG=\'resumes\';S.kw=\'\';render()">📋 简历库 <span class="tag tag-g" style="margin-left:4px">'+S.rTotal+'</span></div>'
+    +'<div class="'+(PG==='tasks'?'on':'')+'" onclick="PG=\'tasks\';render()">⚙️ 处理队列</div>'
++'<div class="'+(PG==='feedback'?'on':'')+'" onclick="PG=\'feedback\';render()">💬 意见箱</div>'
+    +'</nav>'
+    +'<div class="foot"><span>'+esc(U)+'</span><span onclick="doLogout()">退出</span></div>'
+    +'</div>'
+    +'<div class="main">'
+    +'<div class="top"><h2>'+title+'</h2><span style="font-size:11px;color:#bbb">'+new Date().toLocaleDateString('zh-CN')+'</span></div>'
+    +'<div class="body">'
+    +(uploadHint?'<div class="up-zone" onclick="document.getElementById(\''+fiId+'\').click()">'
+      +'<div class="big">📥</div><p>'+uploadHint+'</p>'
+      +'<p style="color:#bbb;font-size:11px;margin-top:4px">支持 PDF，可多选</p>'
+      +'<input id="'+fiId+'" type="file" multiple accept=".pdf" style="display:none" onchange="doUpload(\''+type+'\')"/>'
+      +'</div>':'')
+    +(type!=='tasks'?'<div class="filters">'
+      +'<input placeholder="搜索姓名/邮箱/机构/技能..." value="'+esc(S.kw)+'" onkeydown="if(event.key===\'Enter\')searchKW()"/>'
+      +'<button class="btn btn-p btn-sm" onclick="searchKW()">🔍</button>'
+      +'<span style="flex:1"></span><span style="font-size:11px;color:#999">共 '+(type==='papers'?S.pTotal:S.rTotal)+' 条</span>'
+      +'<button class="btn btn-d btn-sm" onclick="clearAll(\''+type+'\')" style="margin-left:8px">🗑️ 清空全部</button>'
+      +'</div>':'')
+    +content
+    +'</div></div></div>';
+}
+
+function clearAll(type){
+  var label=type==='papers'?'论文':'简历';
+  if(!confirm('确定清空所有'+label+'数据（包括文件和记录）？此操作不可恢复！'))return;
+  api('POST','/api/clear/'+type+'s').then(function(r){
+    if(r.error){toast(r.error,'err');return;}
+    toast('已清空'+label+'库');
+    S.pTotal=0;S.rTotal=0;render();
+  });
+}
+
+function searchKW(){S.kw=document.querySelector('.filters input').value;showWelcome();
+ if(PG==='papers')loadPapers();else loadResumes();}
+
+// ========== Actions ==========
+function doUpload(type){
+  var input=document.getElementById(type+'Fi');if(!input.files.length)return;
+  var fd=new FormData();Array.from(input.files).forEach(function(f){fd.append('files',f);});fd.append('type',type);
+  toast('上传中...');
+  var xhr=new XMLHttpRequest();xhr.open('POST','/api/upload');xhr.setRequestHeader('Authorization','Bearer '+T);
+  xhr.onload=function(){try{var r=JSON.parse(xhr.responseText);if(r.results)toast(r.results.length+' 个文件已上传');processPending();}catch(e){toast('上传失败','err');}render();};
+  xhr.onerror=function(){toast('上传失败','err');};xhr.send(fd);
+}
+function processPending(){
+  toast('开始处理...');
+  api('POST','/api/process/pending').then(function(r){
+    if(r.error){toast(r.error,'err');return;}
+    toast('已提交 '+r.processing+' 个任务');
+    // 轮询刷新直到所有任务完成
+    var pollCount=0;
+    var pollTimer=setInterval(function(){
+      pollCount++;
+      loadPapers();loadResumes();loadTasks();
+      api('GET','/api/tasks').then(function(r){
+        if(!r.data||!r.data.length||pollCount>60)clearInterval(pollTimer);
+        var pending=r.data.filter(function(t){return t.status==='pending'||t.status==='processing';});
+        if(pending.length===0)clearInterval(pollTimer);
+      });
+    },5000);
+  });
+}
+function delCand(id){
+  if(!confirm('确定删除此候选人？'))return;
+  api('DELETE','/api/candidates/'+id).then(function(){toast('已删除');showWelcome();
+ if(PG==='papers')loadPapers();else loadResumes();});
+}
+function deleteFile(id){
+  if(!confirm('删除文件及其分析数据？'))return;
+  api('DELETE','/api/file/'+id).then(function(r){if(r.error){toast(r.error,'err');return;}toast('已删除');loadPapers();loadResumes();loadTasks();});
+}
+function deletePaper(id){
+  if(!confirm('删除此论文及其所有作者数据？'))return;
+  api('DELETE','/api/paper/'+id).then(function(r){if(r.error){toast(r.error,'err');return;}toast('已删除');loadPapers();loadTasks();});
+}
+
+// ========== Downloads ==========
+function downloadFile(tid){
+  fetch('/api/download/'+tid,{headers:{'Authorization':'Bearer '+T}})
+  .then(function(r){if(!r.ok)throw new Error('下载失败');return r.blob();})
+  .then(function(blob){
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement('a');a.href=url;a.download='';document.body.appendChild(a);a.click();
+    setTimeout(function(){URL.revokeObjectURL(url);document.body.removeChild(a);},100);
+  })
+  .catch(function(e){toast(e.message,'err');});
+}
+function downloadTask(id){downloadFile(id);}
+
+// ========== Detail Drawer ==========
+function openDetail(id){
+  api('GET','/api/candidates/'+id).then(function(c){if(c.error)return;showCandidateDrawer(c);});
+}
+function openAuthorDetail(id){
+  api('GET','/api/candidates/'+id).then(function(c){if(c.error)return;showCandidateDrawer(c);});
+}
+function showCandidateDrawer(c){
+    var h='<h3>'+esc(c.name)+'</h3>';
+    h+='<div class="field">📧 '+(esc(c.email)||'—')+'</div>';
+    h+='<div class="field">📱 '+(esc(c.phone)||'—')+'</div>';
+    if(c.github_url)h+='<div class="field">🐙 <a href="'+esc(c.github_url)+'" target="_blank">'+esc(c.github_username||'GitHub')+'</a></div>';
+    else h+='<div class="field">🐙 GitHub: 未找到</div>';
+    h+='<div class="field">🏫 '+(esc(c.institution)||'—')+'</div>';
+    h+='<div class="field">🔬 '+(esc(c.research_field)||'—')+'</div>';
+    h+='<div class="field">🎯 来源: <span class="tag tag-b">'+(c.source||'')+'</span> 匹配: <span class="tag '+(c.match_confidence==='high'?'tag-g':c.match_confidence==='medium'?'tag-y':'tag-gray')+'">'+confT(c.match_confidence||'')+'</span></div>';
+    if(c.education&&c.education.length){
+      h+='<div class="sep"></div><div class="label">🎓 教育经历</div>';
+      c.education.forEach(function(e){h+='<div class="field"><b>'+esc(e.school||'')+'</b> · '+esc(e.degree||'')+' · '+esc(e.major||'')+' <span style="color:#999">'+(e.year||'')+'</span></div>';});
+    }
+    if(c.work_experience&&c.work_experience.length){
+      h+='<div class="sep"></div><div class="label">💼 工作经历</div>';
+      c.work_experience.forEach(function(w){h+='<div class="field"><b>'+esc(w.company||'')+'</b> · '+esc(w.role||'')+' <span style="color:#999">'+(w.duration||'')+'</span></div>';});
+    }
+    if(c.skills&&c.skills.length){
+      h+='<div class="sep"></div><div class="label">🛠️ 技能</div>';
+      h+='<div class="sk-list">'+c.skills.map(function(s){return '<span class="tag tag-gray">'+esc(s)+'</span>';}).join('')+'</div>';
+    }
+    document.getElementById('drawer').innerHTML=h;
+    document.getElementById('drawer').classList.add('show');
+    document.getElementById('mask').classList.add('show');
+}
+function closeDrawer(){document.getElementById('drawer').classList.remove('show');document.getElementById('mask').classList.remove('show');}
+
+
+function toggleSide(){var s=document.querySelector('.side');var m=document.getElementById('maskM');s.classList.toggle('open');m.classList.toggle('show');}
+// ========== Feedback ==========
+function loadFeedback(){
+ api('GET','/api/feedback').then(function(r){
+ if(r.error)return;
+ var data=r.data||[];
+ var list=data.map(function(f){
+ return '<div style="background:#fff;border-radius:8px;padding:12px;margin-bottom:8px;box-shadow:0 1px 3px rgba(0,0,0,.04)">'
+ +'<div style="display:flex;justify-content:space-between;margin-bottom:4px">'
+ +'<span style="font-size:12px;color:#333">'+esc(f.author||'匿名')+'</span>'
+ +'<span style="font-size:11px;color:#999">'+esc((f.created_at||'').slice(0,16))+'</span>'
+ +'</div>'
+ +'<div style="font-size:13px;color:#555;line-height:1.6">'+esc(f.content)+'</div>'
+ +'</div>';
+ }).join('');
+ document.getElementById('app').innerHTML=
+ layout('💬 意见箱','','',
+ '<div style="margin-bottom:12px"><div style="display:flex;gap:8px"><textarea id="fb" placeholder="写下你的改进建议或遇到的问题..." style="flex:1;background:#fff;border:1px solid #ddd;border-radius:8px;padding:10px 14px;font-size:13px;resize:vertical;min-height:60px;outline:none;font-family:inherit"></textarea>'
+ +'<button class="btn btn-p" onclick="submitFeedback()" style="align-self:flex-end;padding:10px 20px">提交</button>'
+ +'</div></div>'
+ +(list||'<div class="empty"><div class="big">💬</div>暂无意见</div>'));
+ });
+}
+async function submitFeedback(){
+ var t=document.getElementById('fb');if(!t)return;
+ var v=t.value.trim();if(!v){toast('请输入内容','err');return;}
+ try{
+ var x=new XMLHttpRequest();x.open('POST','/api/feedback');
+ x.setRequestHeader('Content-Type','application/json');
+ x.setRequestHeader('Authorization','Bearer '+T);
+ x.send(JSON.stringify({content:v}));
+ t.value='';toast('感谢反馈！','ok');
+ loadFeedback();
+ }catch(e){toast('提交失败','err');}
+}
+function showWelcome(){
+ if(!sessionStorage.getItem('ws')){
+ document.getElementById('app').innerHTML+=
+ '<div class="modal-overlay" id="wm" style="display:flex"><div class="modal">'
+ +'<h3>👋 欢迎体验 Talent Hunter</h3>'
+ +'<p>由于模型处理速度较慢，请一次性不要上传过多 PDF。<br><br>'
+ +'⚠️ GitHub 匹配功能暂不太准确，仅供参考。</p>'
+ +'<button onclick="document.getElementById(\'wm\').style.display=\'none\';sessionStorage.setItem(\'ws\',\'1\')">知道了</button>'
+ +'</div></div>';
+ }
+}
+
+// ========== Render ==========
+function render(){
+  if(!T){
+    document.getElementById('app').innerHTML=
+      '<div class="login-bg"><div class="login-box">'
+      +'<h1>🎯 人才数据库</h1><p class="sub">论文作者搜索 + 简历解析</p>'
+      +'<input id="lu" placeholder="用户名" onkeydown="if(event.key===\'Enter\')doLogin()"/>'
+      +'<input id="lp" type="password" placeholder="密码" onkeydown="if(event.key===\'Enter\')doLogin()"/>'
+      +'<button class="btn btn-p" style="width:100%;padding:12px;font-size:15px;border-radius:8px" onclick="doLogin()">登 录</button>'
+      +'<p style="font-size:11px;color:#ccc;margin-top:12px">默认 admin / admin</p>'
+      +'</div></div>';return;
+  }
+  // 先获取 counts，再加载当前 tab 详情
+  api('GET','/api/papers?keyword=').then(function(r){if(!r.error)S.pTotal=r.total;});
+  api('GET','/api/resumes?keyword=').then(function(r){if(!r.error)S.rTotal=r.total;});
+  showWelcome();
+ if(PG==='papers')loadPapers();
+  else if(PG==='resumes')loadResumes();
+  else if(PG==='tasks')loadTasks();
+ else if(PG==='feedback')loadFeedback();
+}
+// Welcome modal - show after login
+function showWelcome(){if(!sessionStorage.getItem('welcomeSeen')){var m=document.getElementById('welcomeModal');if(m){m.classList.add('show');sessionStorage.setItem('welcomeSeen','1');}}}
+// Feedback
+async function submitFeedback(){var t=document.getElementById('feedbackText');if(!t)return;var v=t.value.trim();if(!v){return;}try{var xhr=new XMLHttpRequest();xhr.open('POST','/api/feedback');xhr.setRequestHeader('Content-Type','application/json');xhr.send(JSON.stringify({content:v}));t.value='';toast('感谢反馈！','ok');}catch(e){toast('提交失败','err');}}
+// Show welcome after render
+setTimeout(showWelcome,300);
+render();
+</script>
+<div class="modal-overlay" id="welcomeModal">
+<div class="modal">
+<h3>👋 欢迎体验 Talent Hunter</h3>
+<p>由于模型（MiniMax-M2.5）处理速度较慢，请一次性不要上传过多 PDF。<br><br>⚠️ GitHub 匹配功能暂不太准确，仅供参考。</p>
+<button onclick="document.getElementById('welcomeModal').classList.remove('show')">知道了</button>
+</div></div>
+</body>
+</html>
