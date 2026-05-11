@@ -71,18 +71,18 @@ const loading = ref(false)
 
 const loadData = async () => {
   loading.value = true
-  candidate.value = await api.getCandidate(route.params.id)
+  try {
+    const resp = await api.getCandidate(route.params.id)
+    candidate.value = resp?.error ? null : (resp.name ? resp : null)
+  } catch (e) { console.error(e) }
   loading.value = false
 }
 
 const download = () => {
-  const url = `/api/candidates/${candidate.value.id}/download`
-  const link = document.createElement('a')
-  link.href = url
-  link.download = ''
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
+  if (!candidate.value?.id) return
+  const token = localStorage.getItem('token') || ''
+  const url = `/api/candidates/${candidate.value.id}/download?token=${token}`
+  window.open(url, '_blank')
 }
 
 const del = async () => {

@@ -27,9 +27,9 @@ const doLogin = async () => {
   try {
     const resp = await api.login({ username: username.value, password: password.value })
     if (resp.token) {
-      localStorage.setItem('token', resp.token)
-      localStorage.setItem('username', resp.username)
-      localStorage.setItem('role', resp.role)
+      localStorage.setItem('token', resp.token || '')
+      localStorage.setItem('username', resp.username || '')
+      localStorage.setItem('role', resp.role || '')
       router.push('/')
     } else {
       ElMessage.error(resp.error || '登录失败')

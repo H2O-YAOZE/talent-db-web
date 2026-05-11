@@ -7,7 +7,7 @@
       drag
       multiple
       :auto-upload="false"
-      :on-change="onChange"
+      @change="onChange"
       accept=".pdf"
       style="margin-bottom:20px"
     >
@@ -36,7 +36,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onUnmounted } from 'vue'
 import { api } from '../api'
 import { ElMessage } from 'element-plus'
 
@@ -45,6 +45,7 @@ const uploading = ref(false)
 const results = ref([])
 const uploaderName = ref('')
 const batchName = ref('')
+let pollTimer = null
 
 const onChange = () => {}
 
@@ -76,7 +77,7 @@ const doUpload = async () => {
 
 const pollTasks = (attempt) => {
   if (attempt > 30) return
-  setTimeout(async () => {
+  pollTimer = setTimeout(async () => {
     const resp = await api.listTasks()
     if (resp?.data) {
       const pending = resp.data.filter(t => t.status === 'pending' || t.status === 'processing')
@@ -88,4 +89,6 @@ const pollTasks = (attempt) => {
     pollTasks(attempt + 1)
   }, 3000)
 }
+
+onUnmounted(() => { if (pollTimer) clearTimeout(pollTimer) })
 </script>

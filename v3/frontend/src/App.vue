@@ -28,7 +28,7 @@
       <div style="position:absolute;bottom:0;width:200px;padding:16px;border-top:1px solid rgba(255,255,255,.1);font-size:12px;color:#a0aec0">
         👤 {{ username }}
         <el-tag v-if="role === 'admin'" size="small" type="danger" style="margin-left:4px">管理员</el-tag>
-        <el-button text size="small" style="color:#e74c3c;margin-left:8px" @click="logout">退出</el-button>
+        <el-button link size="small" style="color:#e74c3c;margin-left:8px" @click="logout">退出</el-button>
       </div>
     </el-aside>
     <el-main style="background:#f5f7fa;padding:24px;overflow-y:auto">
@@ -57,6 +57,8 @@ const logout = () => {
 
 watch(() => route.path, () => {
   token.value = localStorage.getItem('token') || ''
+  username.value = localStorage.getItem('username') || ''
+  role.value = localStorage.getItem('role') || ''
 })
 </script>
 

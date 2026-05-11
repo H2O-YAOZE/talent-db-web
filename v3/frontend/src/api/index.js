@@ -28,7 +28,7 @@ export const api = {
   // Candidates
   listCandidates: (params = {}) => {
     const q = new URLSearchParams(params).toString()
-    return request('GET', `/api/candidates?${q}`)
+    return request('GET', `/api/candidates${q ? '?' + q : ''}`)
   },
   getCandidate: (id) => request('GET', `/api/candidates/${id}`),
   deleteCandidate: (id) => request('DELETE', `/api/candidates/${id}`),

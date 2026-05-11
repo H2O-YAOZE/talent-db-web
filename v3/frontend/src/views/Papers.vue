@@ -28,7 +28,7 @@
             <div v-if="p.summary" style="color:#999;font-size:12px;margin-top:4px">{{ p.summary }}</div>
           </div>
           <el-button text size="small" type="primary" @click="showAuthors = showAuthors === p.id ? null : p.id">
-            {{ p.authors.length }} 位作者 {{ showAuthors === p.id ? '▲' : '▼' }}
+            {{ (p.authors || []).length }} 位作者 {{ showAuthors === p.id ? '▲' : '▼' }}
           </el-button>
         </div>
 
@@ -95,9 +95,11 @@ const loadData = async () => {
 const search = () => { page.value = 1; loadData() }
 
 onMounted(async () => {
-  const [t, s] = await Promise.all([api.getTeams(), api.getSchools()])
-  teams.value = t?.data || []
-  schools.value = s?.data || []
+  try {
+    const [t, s] = await Promise.all([api.getTeams(), api.getSchools()])
+    teams.value = t?.data || []
+    schools.value = s?.data || []
+  } catch (e) { console.error(e) }
   loadData()
 })
 </script>
