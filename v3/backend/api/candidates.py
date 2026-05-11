@@ -56,17 +56,17 @@ def list_candidates(
 def candidate_detail(cid: int, username: str = __import__('fastapi').Depends(get_user)):
     conn = get_db()
     row = conn.execute("SELECT * FROM candidates WHERE id=?", (cid,)).fetchone()
-    conn.close()
     if not row:
+        conn.close()
         return {"error": "Not found"}
     d = dict(row)
     for f in ["education", "work_experience", "skills", "social_links"]:
         try: d[f] = json.loads(d[f]) if d[f] else []
         except: d[f] = []
-    # Find associated task_id for download
     if d.get("source_file"):
         task = conn.execute("SELECT id FROM task_queue WHERE file_path=?", (d["source_file"],)).fetchone()
         d["task_id"] = task["id"] if task else None
+    conn.close()
     return d
 
 
