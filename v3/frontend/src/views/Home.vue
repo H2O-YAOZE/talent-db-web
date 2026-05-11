@@ -44,7 +44,7 @@
       </el-table-column>
       <el-table-column label="操作" width="120" fixed="right">
         <template #default="{ row }">
-          <el-button type="primary" text size="small" @click="goDetail(row.id)">详情</el-button>
+          <el-button type="primary" size="small" @click.stop="goDetail(row.id)">详情</el-button>
           <el-popconfirm v-if="canDelete(row)" title="确定删除？" @confirm="del(row.id)">
             <template #reference>
               <el-button type="danger" text size="small">删除</el-button>
@@ -87,7 +87,9 @@ const getCompany = (row) => {
   return exps[0]?.company || ''
 }
 
-const goDetail = (id) => router.push(`/candidate/${id}`)
+const goDetail = (id) => {
+  try { router.push(`/candidate/${id}`) } catch(e) {}
+}
 
 const currentUser = localStorage.getItem('username') || ''
 const currentRole = localStorage.getItem('role') || ''
