@@ -1,5 +1,6 @@
-import json
+import json, os
 from fastapi import APIRouter, Query, Header, HTTPException
+from fastapi.responses import FileResponse
 from database import get_db
 from api.auth import get_user, _get_session
 
@@ -62,7 +63,21 @@ def candidate_detail(cid: int, username: str = __import__('fastapi').Depends(get
     for f in ["education", "work_experience", "skills", "social_links"]:
         try: d[f] = json.loads(d[f]) if d[f] else []
         except: d[f] = []
+    # Find associated task_id for download
+    if d.get("source_file"):
+        task = conn.execute("SELECT id FROM task_queue WHERE file_path=?", (d["source_file"],)).fetchone()
+        d["task_id"] = task["id"] if task else None
     return d
+
+
+@router.get("/candidates/{cid}/download")
+def download_candidate_file(cid: int):
+    conn = get_db()
+    row = conn.execute("SELECT source_file FROM candidates WHERE id=?", (cid,)).fetchone()
+    conn.close()
+    if not row or not row["source_file"] or not os.path.exists(row["source_file"]):
+        raise HTTPException(404, "源文件不存在")
+    return FileResponse(row["source_file"], filename=os.path.basename(row["source_file"]))
 
 
 @router.delete("/candidates/{cid}")

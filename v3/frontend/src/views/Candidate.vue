@@ -5,11 +5,14 @@
       <template #header>
         <div style="display:flex;justify-content:space-between;align-items:center">
           <span style="font-size:18px;font-weight:600">👤 {{ candidate.name }}</span>
-          <el-popconfirm title="确定删除？" @confirm="del">
-            <template #reference>
-              <el-button type="danger" size="small">删除</el-button>
-            </template>
-          </el-popconfirm>
+          <div style="display:flex;gap:8px">
+            <el-button v-if="candidate.task_id" size="small" @click="download">📥 下载源文件</el-button>
+            <el-popconfirm title="确定删除？" @confirm="del">
+              <template #reference>
+                <el-button type="danger" size="small">删除</el-button>
+              </template>
+            </el-popconfirm>
+          </div>
         </div>
       </template>
 
@@ -70,6 +73,16 @@ const loadData = async () => {
   loading.value = true
   candidate.value = await api.getCandidate(route.params.id)
   loading.value = false
+}
+
+const download = () => {
+  const url = `/api/candidates/${candidate.value.id}/download`
+  const link = document.createElement('a')
+  link.href = url
+  link.download = ''
+  document.body.appendChild(link)
+  link.click()
+  document.body.removeChild(link)
 }
 
 const del = async () => {
