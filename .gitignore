@@ -12,4 +12,5 @@ v3/backend/__pycache__/
 v3/backend/*.pyc
 v3/backend/server.log
 v3/.env
+v3/frontend/.vite/
 *.log

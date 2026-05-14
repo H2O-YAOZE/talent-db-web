@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 load_dotenv(os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), ".env"))
 
 SECRET_KEY = os.getenv("TALENT_SECRET_KEY", "talent-db-2026")
-LLM_BASE_URL = "https://dashscope.aliyuncs.com/compatible-mode/v1"
+LLM_BASE_URL = os.getenv("TALENT_LLM_BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1")
 LLM_MODEL = os.getenv("TALENT_LLM_MODEL", "qwen-max")
 LLM_API_KEY = os.getenv("TALENT_LLM_API_KEY", "")
 LLM_MAX_CHARS = 25000

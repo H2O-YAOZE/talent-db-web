@@ -8,7 +8,7 @@ def call_llm(prompt, max_retries=2):
     if len(prompt) > max_chars:
         prompt = prompt[:max_chars] + "\n\n[文本已截断]"
     headers = {"Content-Type": "application/json", "Authorization": f"Bearer {LLM_API_KEY}"}
-    payload = {"model": LLM_MODEL, "messages": [{"role": "user", "content": prompt}], "max_tokens": 4096, "temperature": 0.1}
+    payload = {"model": LLM_MODEL, "messages": [{"role": "user", "content": prompt}], "max_tokens": 8192, "temperature": 0.1, "thinking": {"type": "disabled"}}
     for attempt in range(max_retries + 1):
         try:
             resp = requests.post(f"{LLM_BASE_URL}/chat/completions", headers=headers, json=payload, timeout=120)
